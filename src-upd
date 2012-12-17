@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# $Id$
+
+# TODO
+#  - no bounce if internal
+
+: ${TERM_PROG:=xterm}
+
+# hostname -d -> no bounce
+
+usage()
+{
+	echo "usage: $0 [-B bounce-host] [-x termopt] prof [host ...]" >&2
+	exit 1
+}
+
+die()
+{
+	echo "$0: $@" >&2
+	exit 1
+}
+
+xscreen()
+{
+	local setcwd= xtargs=() cmd="\$SHELL" sshbounce=0
+	local OPTARG OPTIND
+
+	while getopts "Bc:d:x:" c; do
+		case $c in
+		B) sshbounce=1			;;
+		c) cmd=$OPTARG			;;
+		d) setcwd="cd '$OPTARG' &&"	;;
+		x) xtargs+=("$OPTARG")		;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+
+	local host=$1
+	local name=$2
+
+	local screen="screen -A -x -R"
+
+	if [[ $TERM_PROG =~ xterm ]]; then
+		xtargs+=(-xrm 'XTerm*allowTitleOps: false' -title "${host%%.*}: $name")
+	fi
+
+	if [ $sshbounce -eq 1 ]; then
+		$TERM_PROG "${xtargs[@]}" -e ssh -t $bounce_host \
+		    "ssh -t $host '$setcwd $screen -S $name sh -c \"$cmd\"'" &
+	else
+		$TERM_PROG "${xtargs[@]}" -e ssh -t $host \
+		    "$setcwd $screen -S $name sh -c '$cmd'" &
+	fi
+}
+
+bounce_host=
+xtopts=()
+while getopts "B:x:" c; do
+	case $c in
+	B) bounce_host=$OPTARG	;;
+	x) xtopts+=(-x "$OPTARG");;
+	*) usage		;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+[ $# -ge 1 ] || usage
+
+prof=$1
+shift
+
+myhosts="$@"
+
+. ../../psc_fsutil_libs/utils/daemon/pfl_daemon.cfg
+
+for ln; do
+	host=${ln%%:*}
+	t0=${ln#*:}
+	_fl=${t0#*:}
+	bounce=
+	skip=0
+	idir=$dir
+
+	while :; do
+		fl="${_fl%%:*}"
+		_fl="${_fl#*:}"
+
+		case $fl in
+		bounce)	bounce=-B		;;
+		share)	skip=1; break		;;
+		dir=*)	idir=${fl#dir=}		;;
+		esac
+
+		# terminal condition for flags processing
+		[ x"$fl" = x"$_fl" ] && break
+	done
+
+	[ $skip -eq 1 ] && continue
+
+	if [ -n "$myhosts" ]; then
+		skip=1
+		for th in $myhosts; do
+			if [[ $host =~ ^$th ]]; then
+				skip=0
+				break
+			fi
+		done
+		[ $skip -eq 1 ] && continue
+	fi
+
+	xscreen "${xtopts[@]}" $bounce -d $idir/src/p \
+	    -c "umask 2 && svn up && clear && svn st && \
+	    PSC_MAKE_STATUS=1 gmake build >/dev/null; \$SHELL" $host $prof.src
+done
