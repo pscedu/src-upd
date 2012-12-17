@@ -1,0 +1,62 @@
+.\" $Id$
+.\" %PSC_START_COPYRIGHT%
+.\" -----------------------------------------------------------------------------
+.\" Copyright (c) 2011-2012, Pittsburgh Supercomputing Center (PSC).
+.\"
+.\" Permission to use, copy, and modify this software and its documentation
+.\" without fee for personal use or non-commercial use within your organization
+.\" is hereby granted, provided that the above copyright notice is preserved in
+.\" all copies and that the copyright and this permission notice appear in
+.\" supporting documentation.  Permission to redistribute this software to other
+.\" organizations or individuals is not permitted without the written permission
+.\" of the Pittsburgh Supercomputing Center.  PSC makes no representations about
+.\" the suitability of this software for any purpose.  It is provided "as is"
+.\" without express or implied warranty.
+.\" -----------------------------------------------------------------------------
+.\" %PSC_END_COPYRIGHT%
+.Dd December 17, 2012
+.Dt SRC-UPD 1
+.ds volume PSC \- Administrator's Manual
+.Os http://www.psc.edu/
+.Sh NAME
+.Nm src-upd
+.Nd manage source trees across a deployment
+.Sh SYNOPSIS
+.Nm src-upd
+.Bk -words
+.Op Fl B Ar bounce-host
+.Op Fl x termopt
+.Ar deployment
+.Op Ar host ...
+.Ek
+.Sh DESCRIPTION
+The
+.Nm
+utility spawns terminal emulators for the purposes of managing source
+code updates across a deployment of hosts.
+.Pp
+The following options are available:
+.Bl -tag -width Ds
+.It Fl B Ar bounce-host
+Override the default
+.Xr ssh 1
+bounce host if a host is configured to use one.
+A default can be specified in
+.Pa pfl_daemon.cfg .
+.It Fl x Ar termarg
+Provide auxillary arguments to the terminal emulator.
+.El
+.Sh ENVIRONMENT
+.Bl -tag -width Ev
+.It Ev TERM_PROG
+Override the terminal emulator that is spawned for each host session.
+Defaults to
+.Dq xterm .
+.El
+.Sh FILES
+.Bl -tag -width Pa
+.It Pa pfl_daemon.cfg
+Deployment configuration(s).
+.El
+.Sh SEE ALSO
+.Xr xterm 1
