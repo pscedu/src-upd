@@ -74,16 +74,16 @@ myhosts="$@"
 . ../../psc_fsutil_libs/utils/daemon/pfl_daemon.cfg
 
 for ln; do
-	host=${ln%%:*}
-	t0=${ln#*:}
-	_fl=${t0#*:}
+	host=${ln%%%*}
+	t0=${ln#*%}
+	_fl=${t0#*%}
 	bounce=
 	skip=0
 	idir=$dir
 
 	while :; do
-		fl="${_fl%%:*}"
-		_fl="${_fl#*:}"
+		fl="${_fl%%%*}"
+		_fl="${_fl#*%}"
 
 		case $fl in
 		bounce)	bounce=-B		;;
