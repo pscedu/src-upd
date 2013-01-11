@@ -71,7 +71,7 @@ shift
 
 myhosts="$@"
 
-. ../../psc_fsutil_libs/utils/daemon/pfl_daemon.cfg
+. ../../pfl/utils/daemon/pfl_daemon.cfg
 
 for ln; do
 	host=${ln%%%*}
