@@ -25,6 +25,7 @@
 .Nm src-upd
 .Bk -words
 .Op Fl B Ar bounce-host
+.Op Fl R Ar revision
 .Op Fl x termopt
 .Ar deployment
 .Op Ar host ...
@@ -43,6 +44,10 @@ Override the default
 bounce host if a host is configured to use one.
 A default can be specified in
 .Pa pfl_daemon.cfg .
+.It Fl R Ar revision
+Upgrade (or downgrade) the tree on the specified host(s) to the given
+repository revision.
+The default is to update to the latest repository head revision.
 .It Fl x Ar termarg
 Provide auxillary arguments to the terminal emulator.
 .El

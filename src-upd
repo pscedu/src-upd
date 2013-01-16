@@ -10,7 +10,7 @@
 
 usage()
 {
-	echo "usage: $0 [-B bounce-host] [-x termopt] prof [host ...]" >&2
+	echo "usage: $0 [-B bounce-host] [-R revision] [-x termopt] prof [host ...]" >&2
 	exit 1
 }
 
@@ -54,11 +54,13 @@ xscreen()
 }
 
 bounce_host=
+rev=
 xtopts=()
-while getopts "B:x:" c; do
+while getopts "B:R:x:" c; do
 	case $c in
 	B) bounce_host=$OPTARG	;;
 	x) xtopts+=(-x "$OPTARG");;
+	R) rev=-r$OPTARG	;;
 	*) usage		;;
 	esac
 done
@@ -109,6 +111,6 @@ for ln; do
 	fi
 
 	xscreen "${xtopts[@]}" $bounce -d $idir/src/p \
-	    -c "umask 2 && svn up && clear && svn st && \
+	    -c "umask 2 && svn up $rev && clear && svn st && \
 	    PSC_MAKE_STATUS=1 gmake build >/dev/null; \$SHELL" $host $prof.src
 done
