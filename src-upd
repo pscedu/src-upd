@@ -72,8 +72,11 @@ prof=$1
 shift
 
 myhosts="$@"
+set --
 
 . ../../pfl/utils/daemon/pfl_daemon.cfg
+
+[ $# -eq 0 ] && die $prof: unknown deployment
 
 for ln; do
 	host=${ln%%%*}
