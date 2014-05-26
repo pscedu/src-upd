@@ -114,6 +114,6 @@ for ln; do
 	fi
 
 	xscreen "${xtopts[@]}" $bounce -d $idir/src/p \
-	    -c "umask 2 && svn up $rev && clear && svn st && \
+	    -c "gmake up && \
 	    PSC_MAKE_STATUS=1 gmake build >/dev/null; \$SHELL" $host $prof.src
 done
