@@ -74,7 +74,7 @@ shift
 myhosts="$@"
 set --
 
-. ../../pfl/utils/daemon/pfl_daemon.cfg
+. ../pfl/utils/daemon/pfl_daemon.cfg
 
 [ $# -eq 0 ] && die $prof: unknown deployment
 
