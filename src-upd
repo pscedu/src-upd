@@ -114,7 +114,8 @@ for ln; do
 	fi
 
 	xscreen "${xtopts[@]}" $bounce -d $idir/src/p \
-	    -c "gmake up && \
+	    -c '[ -n "$DISPLAY" ] || unset SSH_ASKPASS; \
+	    gmake up && \
 	    gmake build >/dev/null && \
-	    sudo gmake install; \$SHELL" $host $prof.src
+	    sudo gmake install; $SHELL' $host $prof.src
 done
