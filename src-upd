@@ -115,5 +115,6 @@ for ln; do
 
 	xscreen "${xtopts[@]}" $bounce -d $idir/src/p \
 	    -c "gmake up && \
-	    PSC_MAKE_STATUS=1 gmake build >/dev/null; \$SHELL" $host $prof.src
+	    gmake build >/dev/null && \
+	    sudo gmake install; \$SHELL" $host $prof.src
 done
