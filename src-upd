@@ -84,16 +84,16 @@ for ln; do
 	_fl=${t0#*%}
 	bounce=
 	skip=0
-	idir=$dir
+	srcdir=$dir
 
 	while :; do
 		fl="${_fl%%%*}"
 		_fl="${_fl#*%}"
 
 		case $fl in
-		bounce)	bounce=-B		;;
-		share)	skip=1; break		;;
-		dir=*)	idir=${fl#dir=}		;;
+		bounce)		bounce=-B		;;
+		share)		skip=1; break		;;
+		srcdir=*)	srcdir=${fl#srcdir=}	;;
 		esac
 
 		# terminal condition for flags processing
@@ -113,7 +113,7 @@ for ln; do
 		[ $skip -eq 1 ] && continue
 	fi
 
-	xscreen "${xtopts[@]}" $bounce -d $idir/src/p \
+	xscreen "${xtopts[@]}" $bounce -d $srcdir \
 	    -c '[ -n "$DISPLAY" ] || unset SSH_ASKPASS; \
 	    umask 2; \
 	    gmake up && \
