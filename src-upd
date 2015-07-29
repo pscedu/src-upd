@@ -74,7 +74,9 @@ shift
 myhosts="$@"
 set --
 
+set -e
 . ../pfl/utils/daemon/pfl_daemon.cfg
+set +e
 
 [ $# -eq 0 ] && die $prof: unknown deployment
 
@@ -113,10 +115,13 @@ for ln; do
 		[ $skip -eq 1 ] && continue
 	fi
 
-	xscreen "${xtopts[@]}" $bounce -d $srcdir \
-	    -c '[ -n "$DISPLAY" ] || unset SSH_ASKPASS; \
-	    umask 2; \
-	    gmake up && \
-	    gmake build >/dev/null && \
+	xscreen "${xtopts[@]}" $bounce -d $srcdir -c '			\
+	    [ -n "$DISPLAY" ] || unset SSH_ASKPASS;			\
+	    umask 2;							\
+	    if [ -z "$MAKEFLAGS" ] && type nproc >/dev/null 2>&1;	\
+		    export MAKEFLAGS=-j$(nproc);			\
+	    fi;								\
+	    gmake up &&							\
+	    gmake build >/dev/null &&					\
 	    sudo gmake install; $SHELL' $host $prof.src
 done
