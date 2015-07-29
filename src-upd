@@ -46,13 +46,21 @@ xscreen()
 	[ -n "$verbose" ] && setverbose='set -x && '
 
 	if [ $sshbounce -eq 1 ]; then
+		[ -n "$verbose" ] && set -x
 		$TERM_PROG "${xtargs[@]}" -e ssh -t $bounce_host \
 		    "$setverbose ssh -t $host '$setcwd $screen -S $name sh -${verbose}c \"$cmd\"'" &
+		set +x
 	else
+		[ -n "$verbose" ] && set -x
 		$TERM_PROG "${xtargs[@]}" -e ssh -t $host \
 		    "$setverbose $setcwd $screen -S $name sh -${verbose}c '$cmd'" &
+		set +x
 	fi
 }
+
+set -e
+. ../pfl/utils/daemon/pfl_daemon.sh
+set +e
 
 bounce_host=
 commit=
@@ -89,6 +97,7 @@ for ln; do
 	_fl=${t0#*%}
 	bounce=
 	skip=0
+	_srcdir=$srcdir
 
 	while :; do
 		fl="${_fl%%%*}"
@@ -97,7 +106,7 @@ for ln; do
 		case $fl in
 		bounce)		bounce=-B		;;
 		share)		skip=1; break		;;
-		srcdir=*)	srcdir=${fl#srcdir=}	;;
+		srcdir=*)	_srcdir=${fl#srcdir=}	;;
 		esac
 
 		# terminal condition for flags processing
@@ -117,7 +126,7 @@ for ln; do
 		[ $skip -eq 1 ] && continue
 	fi
 
-	xscreen "${xtopts[@]}" $bounce -d $srcdir -c '			\
+	xscreen "${xtopts[@]}" $bounce -d $_srcdir -c '			\
 	    [ -n "$DISPLAY" ] || unset SSH_ASKPASS;			\
 	    umask 2;							\
 	    if [ -z "$MAKEFLAGS" ] && type nproc >/dev/null 2>&1; then	\
