@@ -2,15 +2,13 @@
 # $Id$
 
 # TODO
-#  - no bounce if internal
+#  - no bounce if internal (hostname -d -> no bounce)
 
 : ${TERM_PROG:=xterm}
 
-# hostname -d -> no bounce
-
 usage()
 {
-	echo "usage: $0 [-B bounce-host] [-R revision] [-x termopt] prof [host ...]" >&2
+	echo "usage: $0 [-v] [-B bounce-host] [-C commit-id] [-x termopt] prof [host ...]" >&2
 	exit 1
 }
 
@@ -44,24 +42,29 @@ xscreen()
 		xtargs+=(-xrm 'XTerm*allowTitleOps: false' -title "${host%%.*}: $name")
 	fi
 
+	local setverbose
+	[ -n "$verbose" ] && setverbose='set -x && '
+
 	if [ $sshbounce -eq 1 ]; then
 		$TERM_PROG "${xtargs[@]}" -e ssh -t $bounce_host \
-		    "ssh -t $host '$setcwd $screen -S $name sh -c \"$cmd\"'" &
+		    "$setverbose ssh -t $host '$setcwd $screen -S $name sh -${verbose}c \"$cmd\"'" &
 	else
 		$TERM_PROG "${xtargs[@]}" -e ssh -t $host \
-		    "$setcwd $screen -S $name sh -c '$cmd'" &
+		    "$setverbose $setcwd $screen -S $name sh -${verbose}c '$cmd'" &
 	fi
 }
 
 bounce_host=
-rev=
+commit=
 xtopts=()
-while getopts "B:R:x:" c; do
+verbose=
+while getopts "B:C:vx:" c; do
 	case $c in
-	B) bounce_host=$OPTARG	;;
-	x) xtopts+=(-x "$OPTARG");;
-	R) rev=-r$OPTARG	;;
-	*) usage		;;
+	B) bounce_host=$OPTARG		;;
+	C) commit=$OPTARG		;;
+	v) verbose=x			;;
+	x) xtopts+=(-x "$OPTARG")	;;
+	*) usage			;;
 	esac
 done
 shift $(($OPTIND - 1))
@@ -75,7 +78,7 @@ myhosts="$@"
 set --
 
 set -e
-. ../pfl/utils/daemon/pfl_daemon.cfg
+. ../inf/$prof/$prof.dcfg
 set +e
 
 [ $# -eq 0 ] && die $prof: unknown deployment
@@ -86,7 +89,6 @@ for ln; do
 	_fl=${t0#*%}
 	bounce=
 	skip=0
-	srcdir=$dir
 
 	while :; do
 		fl="${_fl%%%*}"
@@ -118,7 +120,7 @@ for ln; do
 	xscreen "${xtopts[@]}" $bounce -d $srcdir -c '			\
 	    [ -n "$DISPLAY" ] || unset SSH_ASKPASS;			\
 	    umask 2;							\
-	    if [ -z "$MAKEFLAGS" ] && type nproc >/dev/null 2>&1;	\
+	    if [ -z "$MAKEFLAGS" ] && type nproc >/dev/null 2>&1; then	\
 		    export MAKEFLAGS=-j$(nproc);			\
 	    fi;								\
 	    gmake up &&							\
